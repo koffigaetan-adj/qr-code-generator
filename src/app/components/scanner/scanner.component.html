@@ -1,0 +1,56 @@
+<div class="mx-auto max-w-4xl px-4 py-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+  <div class="text-center mb-10">
+    <h1 class="text-3xl font-bold text-slate-900 dark:text-white mb-3">Décodeur de QR Code</h1>
+    <p class="text-slate-600 dark:text-slate-400">Importez une image pour lire le contenu d'un QR code.</p>
+  </div>
+
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+    <!-- Upload Area -->
+    <div class="card space-y-4">
+      <h2 class="text-lg font-semibold">1. Importer une image</h2>
+      
+      <label class="flex flex-col items-center justify-center w-full h-64 border-2 border-dashed border-slate-300 dark:border-slate-700 rounded-xl cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800/50 hover:border-brand-400 transition-all bg-white/50 dark:bg-slate-900/50">
+        <div class="flex flex-col items-center justify-center pt-5 pb-6 text-slate-500 text-center px-4">
+          <app-icon name="upload" [size]="32" class="mb-3 text-slate-400" />
+          <p class="text-sm font-medium mb-1">Cliquez pour importer</p>
+          <p class="text-xs opacity-70">PNG, JPG, JPEG</p>
+        </div>
+        <input type="file" class="hidden" accept="image/png,image/jpeg" (change)="onFileSelected($event)" />
+      </label>
+
+      @if (error()) {
+        <div class="p-3 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 text-sm rounded-lg border border-red-100 dark:border-red-800/50">
+          {{ error() }}
+        </div>
+      }
+    </div>
+
+    <!-- Result Area -->
+    <div class="card space-y-4 flex flex-col">
+      <h2 class="text-lg font-semibold">2. Résultat</h2>
+      
+      @if (decodedResult()) {
+        <div class="flex-1 bg-brand-50 dark:bg-brand-900/10 border border-brand-100 dark:border-brand-800/50 rounded-xl p-5 break-all">
+          <p class="text-sm font-mono text-slate-800 dark:text-slate-200 whitespace-pre-wrap">{{ decodedResult() }}</p>
+        </div>
+        <div class="flex gap-2">
+          <button type="button" class="btn-primary flex-1" (click)="copyResult()">
+            <app-icon [name]="resultCopied() ? 'check' : 'copy'" [size]="16" />
+            {{ resultCopied() ? 'Copié !' : 'Copier le contenu' }}
+          </button>
+          @if (isUrl(decodedResult()!)) {
+            <a [href]="decodedResult()" target="_blank" rel="noopener noreferrer" class="btn-secondary">
+              <app-icon name="link" [size]="16" />
+              Ouvrir
+            </a>
+          }
+        </div>
+      } @else {
+        <div class="flex-1 flex flex-col items-center justify-center text-slate-400 dark:text-slate-500 min-h-[16rem]">
+          <app-icon name="grid" [size]="48" class="mb-4 opacity-50" />
+          <p class="text-sm text-center">Aucun QR code lu.<br>Importez une image pour commencer.</p>
+        </div>
+      }
+    </div>
+  </div>
+</div>

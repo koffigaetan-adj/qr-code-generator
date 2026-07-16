@@ -13,6 +13,7 @@ import {
 } from '../../../models/design-options.model';
 import { WizardStateService } from '../../../services/wizard-state.service';
 import { QrExportService } from '../../../services/qr-export.service';
+import { QrStylingService } from '../../../services/qr-styling.service';
 import { DesignPresetStoreService } from '../../../services/design-preset-store.service';
 import { ShareLinkService } from '../../../services/share-link.service';
 import { IconComponent } from '../../shared/icon/icon.component';
@@ -31,6 +32,7 @@ const MAX_LOGO_BYTES = 5 * 1024 * 1024;
 export class StepDesignComponent {
   private readonly wizard = inject(WizardStateService);
   private readonly qrExport = inject(QrExportService);
+  private readonly qrStyling = inject(QrStylingService);
   readonly presetStore = inject(DesignPresetStoreService);
   private readonly shareLink = inject(ShareLinkService);
 
@@ -228,8 +230,7 @@ export class StepDesignComponent {
 
   async copyImageToClipboard(): Promise<void> {
     try {
-      const blob = await this.qrExport.downloadBlob(
-        this.exportFormat(),
+      const blob = await this.qrStyling.exportPng(
         this.content(),
         this.design(),
         this.exportResolution()

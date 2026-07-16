@@ -36,8 +36,15 @@
           <app-icon name="download" [size]="16" /> {{ fr.export.downloadButton }}
         </button>
 
+        @if (exportFormat() === 'png') {
+          <button type="button" class="btn-secondary w-full justify-center" (click)="copyImageToClipboard()">
+            <app-icon [name]="imageCopied() ? 'check' : 'copy'" [size]="16" />
+            {{ imageCopied() ? 'Image copiée !' : 'Copier l\'image' }}
+          </button>
+        }
+
         <button type="button" class="btn-secondary w-full justify-center" (click)="copyShareLink()">
-          <app-icon [name]="shareCopied() ? 'check' : 'copy'" [size]="16" />
+          <app-icon [name]="shareCopied() ? 'check' : 'link'" [size]="16" />
           {{ shareCopied() ? fr.export.shareCopied : fr.export.shareCopyLink }}
         </button>
       </div>
@@ -223,6 +230,18 @@
                 </label>
               }
             </div>
+            
+            <div class="pt-4 mt-2">
+              <label class="block text-sm font-medium mb-2 text-slate-500 dark:text-slate-400">Logos intégrés</label>
+              <div class="flex flex-wrap gap-2">
+                @for (builtin of builtInLogos; track builtin.name) {
+                  <button type="button" (click)="setBuiltInLogo(builtin.dataUrl)" class="p-2 rounded-lg border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors" [title]="builtin.name">
+                    <img [src]="builtin.dataUrl" [alt]="builtin.name" class="w-8 h-8 object-contain" />
+                  </button>
+                }
+              </div>
+            </div>
+
             @if (logoError()) {
               <p class="text-xs text-red-600 dark:text-red-400 mt-2">{{ logoError() }}</p>
             }
@@ -356,6 +375,22 @@
           </div>
           
           <div class="mt-4">
+            @if (presetStore.systemPresets().length > 0) {
+              <h4 class="text-xs font-semibold uppercase tracking-wider text-slate-400 mb-2 mt-4">Système</h4>
+              <ul class="space-y-2">
+                @for (preset of presetStore.systemPresets(); track preset.id) {
+                  <li class="flex items-center justify-between bg-brand-50/50 dark:bg-brand-900/10 border border-brand-100 dark:border-brand-800/50 rounded-lg px-4 py-3 text-sm group hover:shadow-md transition-shadow">
+                    <div class="flex items-center gap-2">
+                      <app-icon name="palette" [size]="16" class="text-brand-500" />
+                      <span class="font-medium">{{ preset.name }}</span>
+                    </div>
+                    <button type="button" class="btn-secondary py-1.5 px-3 text-xs opacity-0 group-hover:opacity-100 transition-opacity" (click)="loadPreset(preset.id)">{{ fr.design.presetsLoad }}</button>
+                  </li>
+                }
+              </ul>
+            }
+
+            <h4 class="text-xs font-semibold uppercase tracking-wider text-slate-400 mb-2 mt-6">Mes Préréglages</h4>
             @if (presetStore.presets().length === 0) {
               <div class="text-center py-6 border-2 border-dashed border-slate-200 dark:border-slate-800 rounded-xl text-slate-500 dark:text-slate-400 text-sm">
                 {{ fr.design.presetsEmpty }}

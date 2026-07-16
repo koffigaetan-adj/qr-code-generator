@@ -1,14 +1,16 @@
 <div class="flex min-h-screen flex-col">
-  <header class="border-b border-slate-200 dark:border-slate-800">
+  <header class="border-b border-slate-200 dark:border-slate-800 bg-white/80 dark:bg-slate-950/80 backdrop-blur-md sticky top-0 z-50">
     <div class="mx-auto flex max-w-5xl items-center justify-between px-4 py-3">
       <a routerLink="/" class="flex items-center gap-2 font-semibold">
-        <span class="flex h-8 w-8 items-center justify-center rounded-lg bg-brand-600 text-white">
+        <span class="flex h-8 w-8 items-center justify-center rounded-lg bg-brand-600 text-white shadow-lg shadow-brand-500/20">
           <app-icon name="link" [size]="16" />
         </span>
         {{ fr.app.title }}
       </a>
-      <nav class="flex items-center gap-1">
-        <a routerLink="/lot" class="btn-ghost">{{ fr.nav.batch }}</a>
+      <nav class="flex items-center gap-1 sm:gap-2">
+        <a routerLink="/scan" class="btn-ghost" routerLinkActive="bg-slate-100 dark:bg-slate-800 text-brand-600 dark:text-brand-400">Scanner</a>
+        <a routerLink="/lot" class="btn-ghost" routerLinkActive="bg-slate-100 dark:bg-slate-800 text-brand-600 dark:text-brand-400">{{ fr.nav.batch }}</a>
+        <div class="w-px h-6 bg-slate-200 dark:bg-slate-800 mx-1"></div>
         <app-theme-toggle />
       </nav>
     </div>
