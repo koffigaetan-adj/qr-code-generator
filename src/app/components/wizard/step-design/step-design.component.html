@@ -6,7 +6,7 @@
     <div class="lg:sticky lg:top-4 lg:self-start space-y-4">
       <div class="card">
         <h3 class="text-sm font-semibold mb-3 text-slate-500 dark:text-slate-400">{{ fr.design.previewTitle }}</h3>
-        <app-qr-preview [content]="effectiveContent()" [design]="design()" [size]="260" />
+        <app-qr-preview [content]="content()" [design]="design()" [size]="260" />
       </div>
 
       <div class="card space-y-3">
@@ -41,39 +41,6 @@
           {{ shareCopied() ? fr.export.shareCopied : fr.export.shareCopyLink }}
         </button>
       </div>
-
-      @if (dynamicLinkEligible()) {
-        <div class="card space-y-3">
-          <h3 class="text-sm font-semibold text-slate-500 dark:text-slate-400">{{ fr.dynamicLink.title }}</h3>
-          <p class="text-xs text-slate-500 dark:text-slate-400">{{ fr.dynamicLink.description }}</p>
-
-          @if (dynamicLink()) {
-            <div class="rounded-lg border border-brand-200 bg-brand-50 dark:border-brand-800 dark:bg-brand-950/30 p-3">
-              <p class="text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">{{ fr.dynamicLink.createdLabel }}</p>
-              <p class="text-sm font-mono break-all text-brand-700 dark:text-brand-300">{{ effectiveContent() }}</p>
-            </div>
-          } @else if (!auth.isSignedIn()) {
-            <button type="button" class="btn-secondary w-full justify-center" (click)="signInWithGoogle()">
-              <app-icon name="link" [size]="16" /> {{ fr.auth.signInGoogle }}
-            </button>
-            <p class="text-xs text-slate-500 dark:text-slate-400">{{ fr.dynamicLink.signInToEnable }}</p>
-          } @else {
-            <button
-              type="button"
-              class="btn-secondary w-full justify-center"
-              [disabled]="isCreatingDynamicLink() || !content()"
-              (click)="enableDynamicLink()"
-            >
-              <app-icon name="link" [size]="16" />
-              {{ isCreatingDynamicLink() ? fr.dynamicLink.creating : fr.dynamicLink.enable }}
-            </button>
-          }
-
-          @if (dynamicLinkError()) {
-            <p class="text-xs text-red-600 dark:text-red-400">{{ dynamicLinkError() }}</p>
-          }
-        </div>
-      }
     </div>
 
     <!-- Customization column -->

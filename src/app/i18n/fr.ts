@@ -4,8 +4,7 @@ export const FR = {
     title: 'Générateur de QR Code',
     metaDescription:
       "Créez, personnalisez et téléchargez des QR codes gratuitement : URL, Wi-Fi, vCard, réseaux sociaux et plus encore.",
-    footer:
-      'Créé avec Angular — 100% gratuit. Tout se passe dans votre navigateur, sauf si vous activez un lien dynamique (nécessite un compte).',
+    footer: 'Créé avec Angular — 100% gratuit, aucune donnée envoyée sur un serveur.',
   },
 
   nav: {
@@ -33,41 +32,6 @@ export const FR = {
     light: 'Thème clair',
     dark: 'Thème sombre',
     toggle: 'Basculer le thème',
-  },
-
-  auth: {
-    signInGoogle: 'Se connecter avec Google',
-    signOut: 'Se déconnecter',
-    signedInAs: 'Connecté en tant que',
-    myQrCodes: 'Mes QR codes',
-    signInRequired: 'Connectez-vous pour continuer.',
-  },
-
-  dynamicLink: {
-    title: 'Lien dynamique',
-    description: "Rendez la destination modifiable après impression : le QR code ne change jamais, mais vous pouvez changer où il pointe à tout moment.",
-    enable: 'Rendre ce lien modifiable après impression',
-    signInToEnable: 'Connectez-vous avec Google pour activer cette option.',
-    createdLabel: 'Lien court généré',
-    creating: 'Création en cours...',
-    error: 'Impossible de créer le lien dynamique. Veuillez réessayer.',
-  },
-
-  dashboard: {
-    title: 'Mes QR codes',
-    subtitle: 'Gérez vos QR codes dynamiques : modifiez leur destination sans les réimprimer.',
-    empty: "Vous n'avez encore créé aucun QR code dynamique.",
-    createOne: 'Créer un QR code',
-    targetLabel: 'Destination actuelle',
-    save: 'Enregistrer',
-    saved: 'Enregistré !',
-    scanCount: 'Scans',
-    lastScanned: 'Dernier scan',
-    never: 'Jamais',
-    createdOn: 'Créé le',
-    delete: 'Supprimer',
-    deleteConfirm: 'Supprimer ce QR code dynamique ? Il cessera de rediriger vers une destination valide.',
-    loadError: 'Impossible de charger vos QR codes.',
   },
 
   wizard: {

@@ -9,12 +9,6 @@
       </a>
       <nav class="flex items-center gap-1">
         <a routerLink="/lot" class="btn-ghost">{{ fr.nav.batch }}</a>
-        @if (auth.isSignedIn()) {
-          <a routerLink="/mes-qr-codes" class="btn-ghost">{{ fr.auth.myQrCodes }}</a>
-          <button type="button" class="btn-ghost" (click)="signOut()">{{ fr.auth.signOut }}</button>
-        } @else {
-          <button type="button" class="btn-ghost" (click)="signInWithGoogle()">{{ fr.auth.signInGoogle }}</button>
-        }
         <app-theme-toggle />
       </nav>
     </div>

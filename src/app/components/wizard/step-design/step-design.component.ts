@@ -15,15 +15,11 @@ import { WizardStateService } from '../../../services/wizard-state.service';
 import { QrExportService } from '../../../services/qr-export.service';
 import { DesignPresetStoreService } from '../../../services/design-preset-store.service';
 import { ShareLinkService } from '../../../services/share-link.service';
-import { FirebaseAuthService } from '../../../services/firebase-auth.service';
-import { DynamicLinkService } from '../../../services/dynamic-link.service';
-import { DynamicLink, DynamicLinkType } from '../../../models/dynamic-link.model';
 import { IconComponent } from '../../shared/icon/icon.component';
 import { ColorPickerComponent } from '../../shared/color-picker/color-picker.component';
 import { QrPreviewComponent } from '../../shared/qr-preview/qr-preview.component';
 
 const MAX_LOGO_BYTES = 5 * 1024 * 1024;
-const DYNAMIC_LINK_TYPES: DynamicLinkType[] = ['url', 'pdf', 'video'];
 
 @Component({
   selector: 'app-step-design',
@@ -37,22 +33,12 @@ export class StepDesignComponent {
   private readonly qrExport = inject(QrExportService);
   readonly presetStore = inject(DesignPresetStoreService);
   private readonly shareLink = inject(ShareLinkService);
-  readonly auth = inject(FirebaseAuthService);
-  private readonly dynamicLinkService = inject(DynamicLinkService);
 
   readonly fr = FR;
   readonly design = this.wizard.design;
   readonly content = this.wizard.encodedContent;
   readonly effectiveDesign = computed(() => getEffectiveDesign(this.design()));
   readonly logoForcesHighEcc = computed(() => !!this.design().logo.dataUrl);
-
-  readonly dynamicLinkEligible = computed(() => DYNAMIC_LINK_TYPES.includes(this.wizard.type() as DynamicLinkType));
-  readonly dynamicLink = signal<DynamicLink | null>(null);
-  readonly isCreatingDynamicLink = signal(false);
-  readonly dynamicLinkError = signal<string | null>(null);
-  readonly effectiveContent = computed(() =>
-    this.dynamicLink() ? this.dynamicLinkService.buildShortUrl(this.dynamicLink()!.id) : this.content(),
-  );
 
   readonly dotStyles: DotStyle[] = ['square', 'rounded', 'dots'];
   readonly cornerStyles: CornerStyle[] = ['square', 'rounded', 'extra-rounded'];
@@ -232,33 +218,12 @@ export class StepDesignComponent {
     try {
       await this.qrExport.download(
         this.exportFormat(),
-        this.effectiveContent(),
+        this.content(),
         this.design(),
         this.exportResolution(),
       );
     } finally {
       this.isDownloading.set(false);
-    }
-  }
-
-  async signInWithGoogle(): Promise<void> {
-    await this.auth.signInWithGoogle();
-  }
-
-  async enableDynamicLink(): Promise<void> {
-    const contentValue = this.wizard.content() as { url?: string };
-    const url = contentValue.url?.trim();
-    if (!url) return;
-
-    this.isCreatingDynamicLink.set(true);
-    this.dynamicLinkError.set(null);
-    try {
-      const link = await this.dynamicLinkService.create(this.wizard.type() as DynamicLinkType, { url });
-      this.dynamicLink.set(link);
-    } catch {
-      this.dynamicLinkError.set(this.fr.dynamicLink.error);
-    } finally {
-      this.isCreatingDynamicLink.set(false);
     }
   }
 
