@@ -1,0 +1,60 @@
+<div class="mx-auto max-w-3xl px-4 py-8">
+  <h2 class="text-xl font-semibold mb-1">{{ fr.dashboard.title }}</h2>
+  <p class="text-sm text-slate-500 dark:text-slate-400 mb-6">{{ fr.dashboard.subtitle }}</p>
+
+  @if (!auth.isSignedIn()) {
+    <div class="card text-center py-10 space-y-4">
+      <p class="text-sm text-slate-500 dark:text-slate-400">{{ fr.auth.signInRequired }}</p>
+      <button type="button" class="btn-primary" (click)="signInWithGoogle()">
+        <app-icon name="link" [size]="16" /> {{ fr.auth.signInGoogle }}
+      </button>
+    </div>
+  } @else if (isLoading()) {
+    <p class="text-sm text-slate-500 dark:text-slate-400">{{ fr.common.loading }}</p>
+  } @else if (loadError()) {
+    <p class="text-sm text-red-600 dark:text-red-400">{{ loadError() }}</p>
+  } @else if (links().length === 0) {
+    <div class="card text-center py-10 space-y-4">
+      <p class="text-sm text-slate-500 dark:text-slate-400">{{ fr.dashboard.empty }}</p>
+      <a routerLink="/create" class="btn-primary inline-flex">{{ fr.dashboard.createOne }}</a>
+    </div>
+  } @else {
+    <ul class="space-y-4">
+      @for (link of links(); track link.id) {
+        <li class="card space-y-3">
+          <p class="text-sm font-mono break-all text-brand-700 dark:text-brand-300">{{ buildShortUrl(link.id) }}</p>
+
+          <div>
+            <label class="block text-sm font-medium mb-1">{{ fr.dashboard.targetLabel }}</label>
+            <div class="flex gap-2">
+              <input
+                type="text"
+                class="input"
+                [ngModel]="draftFor(link.id)"
+                (ngModelChange)="updateDraft(link.id, $event)"
+              />
+              <button
+                type="button"
+                class="btn-secondary shrink-0"
+                [disabled]="isSaving(link.id)"
+                (click)="save(link.id)"
+              >
+                <app-icon [name]="isSaved(link.id) ? 'check' : 'copy'" [size]="16" />
+                {{ isSaved(link.id) ? fr.dashboard.saved : fr.dashboard.save }}
+              </button>
+            </div>
+          </div>
+
+          <div class="flex flex-wrap items-center justify-between gap-2 text-xs text-slate-500 dark:text-slate-400 pt-2 border-t border-slate-100 dark:border-slate-800">
+            <span>{{ fr.dashboard.scanCount }}: {{ link.scanCount }}</span>
+            <span>{{ fr.dashboard.lastScanned }}: {{ link.lastScannedAt ? (link.lastScannedAt | date: 'dd/MM/yyyy HH:mm') : fr.dashboard.never }}</span>
+            <span>{{ fr.dashboard.createdOn }}: {{ link.createdAt | date: 'dd/MM/yyyy' }}</span>
+            <button type="button" class="btn-ghost text-red-600" (click)="remove(link.id)">
+              <app-icon name="trash" [size]="16" /> {{ fr.dashboard.delete }}
+            </button>
+          </div>
+        </li>
+      }
+    </ul>
+  }
+</div>

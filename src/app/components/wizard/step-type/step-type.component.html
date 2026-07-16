@@ -1,0 +1,26 @@
+<div class="max-w-4xl mx-auto">
+  <h2 class="text-xl font-semibold mb-1">{{ fr.qrTypes.sectionTitle }}</h2>
+  <p class="text-sm text-slate-500 dark:text-slate-400 mb-6">{{ fr.qrTypes.sectionSubtitle }}</p>
+
+  <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
+    @for (def of types; track def.type) {
+      <button
+        type="button"
+        (click)="choose(def.type)"
+        class="group flex flex-col items-center gap-2 rounded-xl border p-4 text-center transition
+               hover:border-brand-400 hover:bg-brand-50 dark:hover:bg-brand-950/30 focus:outline-none focus:ring-2 focus:ring-brand-500"
+        [class.border-brand-500]="selectedType() === def.type"
+        [class.bg-brand-50]="selectedType() === def.type"
+        [class.dark:bg-brand-950]="selectedType() === def.type"
+        [class.border-slate-200]="selectedType() !== def.type"
+        [class.dark:border-slate-800]="selectedType() !== def.type"
+      >
+        <span class="flex h-11 w-11 items-center justify-center rounded-full bg-brand-100 text-brand-700 dark:bg-brand-900 dark:text-brand-200">
+          <app-icon [name]="def.icon" [size]="22" />
+        </span>
+        <span class="text-sm font-medium">{{ fr.qrTypes[def.type].label }}</span>
+        <span class="text-xs text-slate-500 dark:text-slate-400">{{ fr.qrTypes[def.type].description }}</span>
+      </button>
+    }
+  </div>
+</div>

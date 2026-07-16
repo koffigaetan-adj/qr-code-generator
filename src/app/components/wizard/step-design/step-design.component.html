@@ -1,0 +1,425 @@
+<div class="max-w-5xl mx-auto">
+  <h2 class="text-xl font-semibold mb-6">{{ fr.design.sectionTitle }}</h2>
+
+  <div class="grid grid-cols-1 lg:grid-cols-[320px_1fr] gap-6">
+    <!-- Preview + export column -->
+    <div class="lg:sticky lg:top-4 lg:self-start space-y-4">
+      <div class="card">
+        <h3 class="text-sm font-semibold mb-3 text-slate-500 dark:text-slate-400">{{ fr.design.previewTitle }}</h3>
+        <app-qr-preview [content]="effectiveContent()" [design]="design()" [size]="260" />
+      </div>
+
+      <div class="card space-y-3">
+        <h3 class="text-sm font-semibold text-slate-500 dark:text-slate-400">{{ fr.export.sectionTitle }}</h3>
+
+        <div>
+          <label class="block text-sm font-medium mb-1">{{ fr.export.format }}</label>
+          <select class="input" [ngModel]="exportFormat()" (ngModelChange)="exportFormat.set($event)">
+            @for (fmt of exportFormats; track fmt) {
+              <option [value]="fmt">{{ fmt.toUpperCase() }}</option>
+            }
+          </select>
+        </div>
+
+        @if (exportFormat() !== 'svg') {
+          <div>
+            <label class="block text-sm font-medium mb-1">{{ fr.export.resolution }}</label>
+            <select class="input" [ngModel]="exportResolution()" (ngModelChange)="setExportResolution($event)">
+              @for (res of resolutions; track res) {
+                <option [value]="res">{{ res }}px</option>
+              }
+            </select>
+          </div>
+        }
+
+        <button type="button" class="btn-primary w-full justify-center" [disabled]="isDownloading() || !content()" (click)="download()">
+          <app-icon name="download" [size]="16" /> {{ fr.export.downloadButton }}
+        </button>
+
+        <button type="button" class="btn-secondary w-full justify-center" (click)="copyShareLink()">
+          <app-icon [name]="shareCopied() ? 'check' : 'copy'" [size]="16" />
+          {{ shareCopied() ? fr.export.shareCopied : fr.export.shareCopyLink }}
+        </button>
+      </div>
+
+      @if (dynamicLinkEligible()) {
+        <div class="card space-y-3">
+          <h3 class="text-sm font-semibold text-slate-500 dark:text-slate-400">{{ fr.dynamicLink.title }}</h3>
+          <p class="text-xs text-slate-500 dark:text-slate-400">{{ fr.dynamicLink.description }}</p>
+
+          @if (dynamicLink()) {
+            <div class="rounded-lg border border-brand-200 bg-brand-50 dark:border-brand-800 dark:bg-brand-950/30 p-3">
+              <p class="text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">{{ fr.dynamicLink.createdLabel }}</p>
+              <p class="text-sm font-mono break-all text-brand-700 dark:text-brand-300">{{ effectiveContent() }}</p>
+            </div>
+          } @else if (!auth.isSignedIn()) {
+            <button type="button" class="btn-secondary w-full justify-center" (click)="signInWithGoogle()">
+              <app-icon name="link" [size]="16" /> {{ fr.auth.signInGoogle }}
+            </button>
+            <p class="text-xs text-slate-500 dark:text-slate-400">{{ fr.dynamicLink.signInToEnable }}</p>
+          } @else {
+            <button
+              type="button"
+              class="btn-secondary w-full justify-center"
+              [disabled]="isCreatingDynamicLink() || !content()"
+              (click)="enableDynamicLink()"
+            >
+              <app-icon name="link" [size]="16" />
+              {{ isCreatingDynamicLink() ? fr.dynamicLink.creating : fr.dynamicLink.enable }}
+            </button>
+          }
+
+          @if (dynamicLinkError()) {
+            <p class="text-xs text-red-600 dark:text-red-400">{{ dynamicLinkError() }}</p>
+          }
+        </div>
+      }
+    </div>
+
+    <!-- Customization column -->
+    <div class="space-y-4">
+      
+      <!-- Tab Navigation -->
+      <div class="flex gap-2 p-1 bg-slate-100 dark:bg-slate-800 rounded-xl overflow-x-auto no-scrollbar shadow-inner border border-slate-200/50 dark:border-slate-700/50">
+        @for (tab of tabs; track tab.id) {
+          <button
+            type="button"
+            (click)="activeTab.set(tab.id)"
+            class="flex-1 flex items-center justify-center gap-2 px-3 py-2 text-sm font-medium rounded-lg transition-all"
+            [class.bg-white]="activeTab() === tab.id"
+            [class.dark:bg-slate-900]="activeTab() === tab.id"
+            [class.text-brand-600]="activeTab() === tab.id"
+            [class.dark:text-brand-400]="activeTab() === tab.id"
+            [class.shadow-sm]="activeTab() === tab.id"
+            [class.text-slate-500]="activeTab() !== tab.id"
+            [class.hover:text-slate-700]="activeTab() !== tab.id"
+            [class.dark:hover:text-slate-300]="activeTab() !== tab.id"
+          >
+            <!-- Assuming IconName type supports these icons -->
+            <app-icon [name]="$any(tab.icon)" [size]="16" />
+            <span class="hidden sm:inline">{{ tab.label }}</span>
+          </button>
+        }
+      </div>
+
+      <!-- Colors Tab -->
+      @if (activeTab() === 'colors') {
+        <div class="card space-y-5 animate-in fade-in slide-in-from-bottom-2 duration-300">
+          <div>
+            <h3 class="text-sm font-semibold text-slate-500 dark:text-slate-400 mb-3">{{ fr.design.colorsTitle }}</h3>
+            <div class="grid grid-cols-2 gap-4">
+              <app-color-picker [label]="fr.design.foregroundColor" [value]="design().foregroundColor" (valueChange)="setForegroundColor($event)" />
+              <app-color-picker [label]="fr.design.backgroundColor" [value]="design().backgroundColor" (valueChange)="setBackgroundColor($event)" />
+            </div>
+          </div>
+
+          <div class="pt-2 border-t border-slate-100 dark:border-slate-800">
+            <label class="flex items-center gap-2 text-sm font-medium mb-3 cursor-pointer">
+              <input
+                type="checkbox"
+                class="h-4 w-4 rounded border-slate-300 text-brand-600 focus:ring-brand-500"
+                [ngModel]="design().foregroundGradient.enabled"
+                (ngModelChange)="toggleGradient($event)"
+              />
+              {{ fr.design.gradient.enable }}
+            </label>
+
+            @if (design().foregroundGradient.enabled) {
+              <div class="grid grid-cols-2 gap-4 bg-slate-50 dark:bg-slate-800/50 p-3 rounded-lg">
+                <app-color-picker
+                  [label]="fr.design.gradient.colorStart"
+                  [value]="design().foregroundGradient.colorStart"
+                  (valueChange)="setGradientStart($event)"
+                />
+                <app-color-picker
+                  [label]="fr.design.gradient.colorEnd"
+                  [value]="design().foregroundGradient.colorEnd"
+                  (valueChange)="setGradientEnd($event)"
+                />
+                <div class="col-span-2">
+                  <label class="block text-sm font-medium mb-2">{{ fr.design.gradient.rotation }} ({{ design().foregroundGradient.rotationDeg }}°)</label>
+                  <input
+                    type="range"
+                    min="0"
+                    max="360"
+                    class="w-full accent-brand-500"
+                    [ngModel]="design().foregroundGradient.rotationDeg"
+                    (ngModelChange)="setGradientRotation(+$event)"
+                  />
+                </div>
+              </div>
+            }
+          </div>
+        </div>
+      }
+
+      <!-- Shapes Tab -->
+      @if (activeTab() === 'shapes') {
+        <div class="space-y-4 animate-in fade-in slide-in-from-bottom-2 duration-300">
+          <div class="card space-y-3">
+            <h3 class="text-sm font-semibold text-slate-500 dark:text-slate-400">{{ fr.design.dotsTitle }}</h3>
+            <div class="flex flex-wrap gap-3">
+              @for (style of dotStyles; track style) {
+                <button
+                  type="button"
+                  (click)="setDotStyle(style)"
+                  class="flex flex-col items-center gap-2 p-3 rounded-xl border-2 transition-all hover:bg-slate-50 dark:hover:bg-slate-800/50"
+                  [class.border-brand-500]="design().dotStyle === style"
+                  [class.bg-brand-50]="design().dotStyle === style"
+                  [class.dark:bg-brand-900/20]="design().dotStyle === style"
+                  [class.border-slate-200]="design().dotStyle !== style"
+                  [class.dark:border-slate-700]="design().dotStyle !== style"
+                >
+                  <div class="w-8 h-8 bg-slate-800 dark:bg-slate-200"
+                       [class.rounded-none]="style === 'square'"
+                       [class.rounded-md]="style === 'rounded'"
+                       [class.rounded-full]="style === 'dots'">
+                  </div>
+                  <span class="text-xs font-medium" [class.text-brand-700]="design().dotStyle === style">{{ fr.design.dotStyles[style] }}</span>
+                </button>
+              }
+            </div>
+          </div>
+
+          <div class="card space-y-3">
+            <h3 class="text-sm font-semibold text-slate-500 dark:text-slate-400">{{ fr.design.cornersTitle }}</h3>
+            <div class="flex flex-wrap gap-3">
+              @for (style of cornerStyles; track style) {
+                <button
+                  type="button"
+                  (click)="setCornerStyle(style)"
+                  class="flex flex-col items-center gap-2 p-3 rounded-xl border-2 transition-all hover:bg-slate-50 dark:hover:bg-slate-800/50"
+                  [class.border-brand-500]="design().cornerStyle === style"
+                  [class.bg-brand-50]="design().cornerStyle === style"
+                  [class.dark:bg-brand-900/20]="design().cornerStyle === style"
+                  [class.border-slate-200]="design().cornerStyle !== style"
+                  [class.dark:border-slate-700]="design().cornerStyle !== style"
+                >
+                  <div class="w-8 h-8 border-4 border-slate-800 dark:border-slate-200 flex items-center justify-center"
+                       [class.rounded-none]="style === 'square'"
+                       [class.rounded-lg]="style === 'rounded'"
+                       [class.rounded-full]="style === 'extra-rounded'">
+                    <div class="w-3 h-3 bg-slate-800 dark:bg-slate-200"
+                         [class.rounded-none]="style === 'square'"
+                         [class.rounded-sm]="style === 'rounded'"
+                         [class.rounded-full]="style === 'extra-rounded'">
+                    </div>
+                  </div>
+                  <span class="text-xs font-medium" [class.text-brand-700]="design().cornerStyle === style">{{ fr.design.cornerStyles[style] }}</span>
+                </button>
+              }
+            </div>
+          </div>
+          
+          <div class="card space-y-3">
+            <h3 class="text-sm font-semibold text-slate-500 dark:text-slate-400">{{ fr.design.eccTitle }}</h3>
+            <div class="flex gap-2">
+              @for (level of eccLevels; track level) {
+                <button
+                  type="button"
+                  (click)="setEccLevel(level)"
+                  [disabled]="logoForcesHighEcc()"
+                  class="btn-secondary"
+                  [class.border-brand-500]="effectiveDesign().errorCorrectionLevel === level"
+                  [class.text-brand-700]="effectiveDesign().errorCorrectionLevel === level"
+                >
+                  {{ fr.design.eccLevels[level] }}
+                </button>
+              }
+            </div>
+          </div>
+        </div>
+      }
+
+      <!-- Logo Tab -->
+      @if (activeTab() === 'logo') {
+        <div class="card space-y-5 animate-in fade-in slide-in-from-bottom-2 duration-300">
+          <div>
+            <h3 class="text-sm font-semibold text-slate-500 dark:text-slate-400 mb-3">{{ fr.design.logoTitle }}</h3>
+            <div class="flex items-center gap-4">
+              @if (design().logo.dataUrl) {
+                <div class="relative group">
+                  <div class="absolute -inset-1 bg-gradient-to-r from-brand-500 to-purple-500 rounded-lg blur opacity-25 group-hover:opacity-50 transition duration-200"></div>
+                  <img [src]="design().logo.dataUrl" alt="" class="relative h-16 w-16 rounded border border-slate-200 dark:border-slate-700 object-contain bg-white" />
+                </div>
+                <button type="button" class="btn-secondary text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 hover:border-red-200" (click)="removeLogo()">
+                  <app-icon name="trash" [size]="16" /> {{ fr.design.logoRemove }}
+                </button>
+              } @else {
+                <label class="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-slate-300 dark:border-slate-700 rounded-xl cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800/50 hover:border-brand-400 transition-all">
+                  <div class="flex flex-col items-center justify-center pt-5 pb-6 text-slate-500">
+                    <app-icon name="upload" [size]="24" class="mb-2" />
+                    <p class="text-sm font-medium">{{ fr.design.logoUpload }}</p>
+                    <p class="text-xs mt-1 opacity-70">PNG, JPG, SVG</p>
+                  </div>
+                  <input type="file" class="hidden" accept="image/png,image/jpeg,image/svg+xml" (change)="onLogoSelected($event)" />
+                </label>
+              }
+            </div>
+            @if (logoError()) {
+              <p class="text-xs text-red-600 dark:text-red-400 mt-2">{{ logoError() }}</p>
+            }
+          </div>
+
+          @if (design().logo.dataUrl) {
+            <div class="pt-4 border-t border-slate-100 dark:border-slate-800">
+              <label class="block text-sm font-medium mb-2">{{ fr.design.logoSize }}</label>
+              <input
+                type="range"
+                min="0.15"
+                max="0.5"
+                step="0.01"
+                class="w-full accent-brand-500"
+                [ngModel]="design().logo.sizeRatio"
+                (ngModelChange)="setLogoSize(+$event)"
+              />
+              <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">{{ fr.design.logoHint }}</p>
+            </div>
+          }
+        </div>
+      }
+
+      <!-- Frame Tab -->
+      @if (activeTab() === 'frame') {
+        <div class="card space-y-4 animate-in fade-in slide-in-from-bottom-2 duration-300">
+          <label class="flex items-center gap-3 p-3 border border-slate-200 dark:border-slate-700 rounded-lg cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
+            <input
+              type="checkbox"
+              class="h-5 w-5 rounded border-slate-300 text-brand-600 focus:ring-brand-500"
+              [ngModel]="design().frame.enabled"
+              (ngModelChange)="toggleFrame($event)"
+            />
+            <span class="font-medium">{{ fr.design.frameTitle }} — {{ fr.design.frameEnable }}</span>
+          </label>
+
+          @if (design().frame.enabled) {
+            <div class="space-y-5 pt-2">
+              <div>
+                <label class="block text-sm font-medium mb-2">{{ fr.design.frameStylesTitle }}</label>
+                <div class="flex flex-wrap gap-2">
+                  @for (style of frameStyles; track style) {
+                    <button
+                      type="button"
+                      (click)="setFrameStyle(style)"
+                      class="btn-secondary"
+                      [class.border-brand-500]="design().frame.style === style"
+                      [class.bg-brand-50]="design().frame.style === style"
+                      [class.dark:bg-brand-900/20]="design().frame.style === style"
+                      [class.text-brand-700]="design().frame.style === style"
+                    >
+                      {{ fr.design.frameStyles[style] }}
+                    </button>
+                  }
+                </div>
+              </div>
+              
+              <div>
+                <label class="block text-sm font-medium mb-1">{{ fr.design.frameCtaText }}</label>
+                <input
+                  type="text"
+                  class="input"
+                  [placeholder]="fr.design.frameCtaPlaceholder"
+                  [ngModel]="design().frame.ctaText"
+                  (ngModelChange)="setFrameCta($event)"
+                />
+              </div>
+              
+              <div class="grid grid-cols-2 gap-4">
+                <app-color-picker [label]="fr.design.frameColor" [value]="design().frame.color" (valueChange)="setFrameColor($event)" />
+                <app-color-picker [label]="fr.design.frameTextColor" [value]="design().frame.textColor" (valueChange)="setFrameTextColor($event)" />
+              </div>
+
+              <div class="pt-2 border-t border-slate-100 dark:border-slate-800">
+                <label class="flex items-center gap-2 text-sm font-medium mb-3 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    class="h-4 w-4 rounded border-slate-300 text-brand-600 focus:ring-brand-500"
+                    [ngModel]="design().frame.gradient.enabled"
+                    (ngModelChange)="toggleFrameGradient($event)"
+                  />
+                  {{ fr.design.gradient.enable }}
+                </label>
+
+                @if (design().frame.gradient.enabled) {
+                  <div class="grid grid-cols-2 gap-4 bg-slate-50 dark:bg-slate-800/50 p-3 rounded-lg">
+                    <app-color-picker
+                      [label]="fr.design.gradient.colorStart"
+                      [value]="design().frame.gradient.colorStart"
+                      (valueChange)="setFrameGradientStart($event)"
+                    />
+                    <app-color-picker
+                      [label]="fr.design.gradient.colorEnd"
+                      [value]="design().frame.gradient.colorEnd"
+                      (valueChange)="setFrameGradientEnd($event)"
+                    />
+                    <div class="col-span-2">
+                      <label class="block text-sm font-medium mb-2">{{ fr.design.gradient.rotation }} ({{ design().frame.gradient.rotationDeg }}°)</label>
+                      <input
+                        type="range"
+                        min="0"
+                        max="360"
+                        class="w-full accent-brand-500"
+                        [ngModel]="design().frame.gradient.rotationDeg"
+                        (ngModelChange)="setFrameGradientRotation(+$event)"
+                      />
+                    </div>
+                  </div>
+                }
+              </div>
+            </div>
+          }
+        </div>
+      }
+
+      <!-- Presets Tab -->
+      @if (activeTab() === 'presets') {
+        <div class="card space-y-4 animate-in fade-in slide-in-from-bottom-2 duration-300">
+          <h3 class="text-sm font-semibold text-slate-500 dark:text-slate-400">{{ fr.design.presetsTitle }}</h3>
+          <div class="flex gap-2">
+            <input
+              type="text"
+              class="input"
+              [placeholder]="fr.design.presetsSaveNamePrompt"
+              [ngModel]="newPresetName()"
+              (ngModelChange)="newPresetName.set($event)"
+            />
+            <button type="button" class="btn-primary shrink-0" (click)="savePreset()">
+              <app-icon name="plus" [size]="16" /> {{ fr.common.save }}
+            </button>
+          </div>
+          
+          <div class="mt-4">
+            @if (presetStore.presets().length === 0) {
+              <div class="text-center py-6 border-2 border-dashed border-slate-200 dark:border-slate-800 rounded-xl text-slate-500 dark:text-slate-400 text-sm">
+                {{ fr.design.presetsEmpty }}
+              </div>
+            } @else {
+              <ul class="space-y-2">
+                @for (preset of presetStore.presets(); track preset.id) {
+                  <li class="flex items-center justify-between bg-slate-50 dark:bg-slate-800/50 rounded-lg px-4 py-3 text-sm group hover:shadow-md transition-shadow">
+                    <span class="font-medium">{{ preset.name }}</span>
+                    <div class="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <button type="button" class="btn-secondary py-1.5 px-3 text-xs" (click)="loadPreset(preset.id)">{{ fr.design.presetsLoad }}</button>
+                      <button type="button" class="btn-ghost py-1.5 px-2 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20" [attr.aria-label]="fr.design.presetsDelete" (click)="deletePreset(preset.id)">
+                        <app-icon name="trash" [size]="16" />
+                      </button>
+                    </div>
+                  </li>
+                }
+              </ul>
+            }
+          </div>
+        </div>
+      }
+    </div>
+  </div>
+
+  <div class="flex justify-between pt-6 max-w-5xl">
+    <button type="button" (click)="back()" class="btn-secondary">
+      <app-icon name="chevron-left" [size]="16" /> {{ fr.wizard.back }}
+    </button>
+    <button type="button" (click)="restart()" class="btn-ghost">
+      {{ fr.wizard.restart }}
+    </button>
+  </div>
+</div>

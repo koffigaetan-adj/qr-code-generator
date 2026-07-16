@@ -1,0 +1,74 @@
+<div class="mx-auto max-w-5xl px-4 py-6">
+  <ol class="mb-10 flex items-center justify-center relative w-full max-w-2xl mx-auto">
+    <!-- Connecting background line -->
+    <div class="absolute left-0 right-0 top-1/2 -translate-y-1/2 h-1 bg-slate-200 dark:bg-slate-800 rounded-full mx-8 -z-10"></div>
+    
+    <!-- Active connecting line -->
+    <div 
+      class="absolute left-0 top-1/2 -translate-y-1/2 h-1 bg-brand-500 rounded-full mx-8 -z-10 transition-all duration-500 ease-in-out"
+      [style.width]="((wizard.step() - 1) / (steps.length - 1)) * 100 + '%'"
+    ></div>
+
+    @for (step of steps; track step; let last = $last) {
+      <li class="flex-1 flex flex-col items-center relative group">
+        <button
+          type="button"
+          (click)="wizard.goToStep(step)"
+          [disabled]="step > wizard.step()"
+          class="relative flex items-center justify-center w-10 h-10 rounded-full border-2 transition-all duration-300 bg-white dark:bg-slate-900 disabled:cursor-not-allowed"
+          [class.border-brand-500]="wizard.step() >= step"
+          [class.border-slate-300]="wizard.step() < step"
+          [class.dark:border-slate-700]="wizard.step() < step"
+          [class.shadow-[0_0_15px_rgba(59,130,246,0.5)]]="wizard.step() === step"
+          [class.scale-110]="wizard.step() === step"
+        >
+          <!-- Inner circle fill -->
+          <div 
+            class="absolute inset-1 rounded-full transition-all duration-300 bg-brand-500"
+            [class.opacity-100]="wizard.step() === step"
+            [class.scale-100]="wizard.step() === step"
+            [class.opacity-0]="wizard.step() !== step"
+            [class.scale-0]="wizard.step() !== step"
+          ></div>
+          
+          <span 
+            class="relative z-10 flex items-center justify-center font-semibold text-sm transition-colors duration-300"
+            [class.text-white]="wizard.step() === step"
+            [class.text-brand-600]="step < wizard.step()"
+            [class.dark:text-brand-400]="step < wizard.step()"
+            [class.text-slate-400]="step > wizard.step()"
+          >
+            @if (step < wizard.step()) {
+              <app-icon name="check" [size]="16" />
+            } @else {
+              {{ step }}
+            }
+          </span>
+        </button>
+        <span 
+          class="absolute -bottom-6 text-xs sm:text-sm font-medium transition-all duration-300"
+          [class.text-brand-700]="wizard.step() === step"
+          [class.dark:text-brand-400]="wizard.step() === step"
+          [class.text-slate-500]="step < wizard.step()"
+          [class.text-slate-400]="step > wizard.step()"
+          [class.opacity-100]="wizard.step() === step"
+          [class.opacity-70]="wizard.step() !== step"
+        >
+          {{ fr.wizard.steps[step] }}
+        </span>
+      </li>
+    }
+  </ol>
+
+  @switch (wizard.step()) {
+    @case (1) {
+      <app-step-type />
+    }
+    @case (2) {
+      <app-step-content />
+    }
+    @case (3) {
+      <app-step-design />
+    }
+  }
+</div>
