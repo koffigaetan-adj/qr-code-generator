@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- Fond coloré avec coins arrondis -->
+  <rect width="512" height="512" rx="128" fill="#4f46e5" />
+  
+  <!-- Motif QR : Carré haut gauche -->
+  <path fill="#ffffff" d="M120 120h112v112H120zM152 152h48v48h-48z"/>
+  
+  <!-- Motif QR : Carré haut droite -->
+  <path fill="#ffffff" d="M280 120h112v112H280zM312 152h48v48h-48z"/>
+  
+  <!-- Motif QR : Carré bas gauche -->
+  <path fill="#ffffff" d="M120 280h112v112H120zM152 312h48v48h-48z"/>
+  
+  <!-- Motif QR : Points aléatoires en bas à droite et au centre -->
+  <rect x="280" y="280" width="48" height="48" fill="#ffffff" rx="12" />
+  <rect x="344" y="280" width="48" height="48" fill="#ffffff" rx="12" />
+  <rect x="280" y="344" width="48" height="48" fill="#ffffff" rx="12" />
+  <rect x="344" y="344" width="48" height="48" fill="#ffffff" rx="12" />
+  
+  <rect x="216" y="216" width="32" height="32" fill="#ffffff" rx="8" />
+</svg>
