@@ -60,15 +60,17 @@
     }
   </ol>
 
-  @switch (wizard.step()) {
-    @case (1) {
-      <app-step-type />
+  <div class="animate-in fade-in slide-in-from-bottom-4 duration-500 ease-out">
+    @switch (wizard.step()) {
+      @case (1) {
+        <app-step-type />
+      }
+      @case (2) {
+        <app-step-content />
+      }
+      @case (3) {
+        <app-step-design />
+      }
     }
-    @case (2) {
-      <app-step-content />
-    }
-    @case (3) {
-      <app-step-design />
-    }
-  }
+  </div>
 </div>

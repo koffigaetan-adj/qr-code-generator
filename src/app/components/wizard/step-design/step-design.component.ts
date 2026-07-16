@@ -61,7 +61,16 @@ export class StepDesignComponent {
   readonly isDownloading = signal(false);
   readonly newPresetName = signal('');
   readonly shareCopied = signal(false);
+  readonly imageCopied = signal(false);
   readonly logoError = signal<string | null>(null);
+
+  readonly builtInLogos = [
+    { name: 'Wi-Fi', dataUrl: 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjMDAwIiBzdHJva2Utd2lkdGg9IjIiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCI+PHBhdGggZD0iTTEyIDIwYy4wMSAwIDAgMCAwIDB6TTguNSAxNi41YTUgNSAwIDAgMSA3IDBMMTIgMjBsLTMuNS0zLjV6IiBmaWxsPSIjMDAwIi8+PHBhdGggZD0iTTUgMTMuMWExMCAxMCAwIDAgMSAxNCAwbC0yLjUgMi41YTYuNSA2LjUgMCAwIDAtOSAwbC0yLjUtMi41ek0xLjUgOS42YTE1IDE1IDAgMCAxIDIxIDBMMjAgMTJsLTEuNS0xLjVhMTIgMTIgMCAwIDAtMTMgMGwtMS41IDEuNS0yLjUtMi40eiIvPjwvc3ZnPg==' },
+    { name: 'X / Twitter', dataUrl: 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0iIzAwMCI+PHBhdGggZD0iTTE4LjI0NCAyLjI1aDMuMzA4bC03LjIyNyA4LjI2IDE4LjUwMiAxMS4yNHgtNy4yOGwtNS43MDEtNy40Ni02LjQ2IDcuNDZINS4xN2w3LjczMS04LjgzNS0xLjIwMS01LjU4M2g3Ljk2MmwtNi4yMiA4LjEzNGguOTRsMTAuMDkyLTEzLjIyNnptLTYuMzQzIDUuNjNINzguNjU0TDExLjgwNCAyaDRuNDJsLTQuMTc1IDUuNjN6Ii8+PC9zdmc+' },
+    { name: 'Facebook', dataUrl: 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0iIzE4NzdGMCI+PHBhdGggZD0iTTI0IDEyYTEyIDEyIDAgMSAwLTEzLjg3NSAxMS44NTJWMTUuNjhoLTMuMTI1VjEySDEwLjEyNVY5LjE1YTMuODc1IDMuODc1IDAgMCAxIDQuMTQxLTQuMjYgMTguNDQzIDE4LjQ0MyAwIDAgMSAyLjQ4Ni4yMTRWOC4waC0xLjM5OWMtMS4zMDUgMC0xLjcyLjYxMi0xLjcyIDEuNjZWMThoMy4wODVMMTYuMTQyIDE1LjY4aC0yLjY0NHY4LjE3MkEyNCAyNCAwIDAgMCAyNCAxMnoiLz48L3N2Zz4=' },
+    { name: 'LinkedIn', dataUrl: 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0iIzBBNjZDMCI+PHBhdGggZD0iTTIuOTQgMThIMjdWNi4xMkg2Ljk0VjE4em0tLjQ4LTIzLjg1NGEyLjMxIDIuMzEgMCAxIDAgMi4zMSA0LjYzIDQuNjMgMCAwIDAgMi4zMS00LjYzVjIuMThBMi4zMSAyLjMxIDAgMCAwIDIuOTMgMnoiLz48cGF0aCBkPSJNOSAxOGg1LjEydi02LjQ4YzAtMS43MS4zMy0zLjM4IDIuNDUtMy4zOCAyLjExIDAgMi4xNCAxLjgyIDIuMTQgMy41VjE4aDUuMTJWOi41YzAtMy4wMy0xLjYzLTQuNDItMy43NS00LjQyYy0xLjc1IDAtMi41My45Ni0yLjk2IDEuNjNWNi4xMmg0LjlWMTh6Ii8+PC9zdmc+' }
+  ];
+
 
   private updateDesign(partial: Partial<DesignOptions>): void {
     this.wizard.setDesign({ ...this.design(), ...partial });
@@ -171,6 +180,10 @@ export class StepDesignComponent {
     reader.readAsDataURL(file);
   }
 
+  setBuiltInLogo(dataUrl: string): void {
+    this.updateDesign({ logo: { ...this.design().logo, dataUrl } });
+  }
+
   removeLogo(): void {
     this.updateDesign({ logo: { ...this.design().logo, dataUrl: null } });
   }
@@ -183,7 +196,7 @@ export class StepDesignComponent {
   }
 
   loadPreset(id: string): void {
-    const preset = this.presetStore.presets().find((p) => p.id === id);
+    const preset = this.presetStore.presets().find((p) => p.id === id) || this.presetStore.systemPresets().find((p) => p.id === id);
     if (preset) this.wizard.setDesign(preset.design);
   }
 
@@ -211,6 +224,28 @@ export class StepDesignComponent {
     textarea.select();
     document.execCommand('copy');
     textarea.remove();
+  }
+
+  async copyImageToClipboard(): Promise<void> {
+    try {
+      const blob = await this.qrExport.downloadBlob(
+        this.exportFormat(),
+        this.content(),
+        this.design(),
+        this.exportResolution()
+      );
+      if (!blob) return;
+
+      const clipboardItem = new ClipboardItem({ [blob.type]: blob });
+      await navigator.clipboard.write([clipboardItem]);
+      
+      this.imageCopied.set(true);
+      setTimeout(() => this.imageCopied.set(false), 2000);
+    } catch (e) {
+      console.error('Failed to copy image', e);
+      // Fallback or show error
+      alert('Impossible de copier l\'image dans le presse-papiers.');
+    }
   }
 
   async download(): Promise<void> {
