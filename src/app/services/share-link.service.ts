@@ -1,4 +1,6 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
+import { Router } from '@angular/router';
+import { Location } from '@angular/common';
 import { SharedQrState } from '../models/wizard-state.model';
 
 const QUERY_PARAM = 's';
@@ -6,17 +8,29 @@ const QUERY_PARAM = 's';
 /** Encodes/decodes the wizard state into a shareable URL query param. No server involved. */
 @Injectable({ providedIn: 'root' })
 export class ShareLinkService {
+  private readonly router = inject(Router);
+  private readonly location = inject(Location);
+
   buildShareUrl(state: SharedQrState): string {
     const encoded = this.encodeState(state);
-    const url = new URL(window.location.href);
-    url.search = '';
-    url.searchParams.set(QUERY_PARAM, encoded);
-    return url.toString();
+    const urlTree = this.router.createUrlTree([], { queryParams: { [QUERY_PARAM]: encoded } });
+    const relativeUrl = this.router.serializeUrl(urlTree);
+    const externalUrl = this.location.prepareExternalUrl(relativeUrl);
+    return window.location.origin + externalUrl;
   }
 
   readStateFromUrl(): SharedQrState | null {
-    const url = new URL(window.location.href);
-    const encoded = url.searchParams.get(QUERY_PARAM);
+    const href = window.location.href;
+    const url = new URL(href);
+    
+    // Extract query parameter either from regular search or hash (if hash routing)
+    let encoded = url.searchParams.get(QUERY_PARAM);
+    if (!encoded && url.hash.includes('?')) {
+      const hashQuery = url.hash.split('?')[1];
+      const hashParams = new URLSearchParams(hashQuery);
+      encoded = hashParams.get(QUERY_PARAM);
+    }
+    
     if (!encoded) return null;
     return this.decodeState(encoded);
   }
