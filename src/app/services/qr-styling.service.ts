@@ -153,6 +153,15 @@ export class QrStylingService {
         textX = width / 2;
         textY = height - bandHeight / 2 - framePadding * 0.15 - borderThickness;
         break;
+      case 'app-store':
+      case 'play-store':
+        width = sizePx + framePadding * 2;
+        height = sizePx + framePadding * 2 + bandHeight + framePadding;
+        qrX = framePadding;
+        qrY = framePadding;
+        textX = width / 2;
+        textY = height - bandHeight / 2 - framePadding * 0.8;
+        break;
     }
 
     canvas.width = width;
@@ -221,13 +230,32 @@ export class QrStylingService {
         radius * 0.4
       );
       ctx.fill();
+    } else if (style === 'app-store' || style === 'play-store') {
+      // Background for QR code
+      ctx.fillStyle = design.backgroundColor;
+      this.roundRect(ctx, 0, 0, width, height, radius);
+      ctx.fill();
+
+      // Pill button
+      ctx.fillStyle = this.getFrameStyle(ctx, design, width, height);
+      this.roundRect(
+        ctx,
+        framePadding,
+        sizePx + framePadding * 1.5,
+        sizePx,
+        bandHeight,
+        bandHeight / 2
+      );
+      ctx.fill();
     }
 
     ctx.drawImage(qrImage, qrX, qrY, sizePx, sizePx);
 
     if (design.frame.ctaText) {
       ctx.fillStyle = design.frame.textColor;
-      ctx.font = `600 ${Math.round(bandHeight * 0.42)}px system-ui, sans-serif`;
+      // Use standard sans-serif, but a bit smaller for app store buttons to fit standard texts
+      const fontSizeMultiplier = (style === 'app-store' || style === 'play-store') ? 0.35 : 0.42;
+      ctx.font = `600 ${Math.round(bandHeight * fontSizeMultiplier)}px system-ui, sans-serif`;
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
       ctx.fillText(design.frame.ctaText, textX, textY);

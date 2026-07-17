@@ -15,7 +15,7 @@ export interface GradientOptions {
   rotationDeg: number;
 }
 
-export type FrameStyle = 'bottom' | 'top' | 'solid' | 'outline';
+export type FrameStyle = 'bottom' | 'top' | 'solid' | 'outline' | 'app-store' | 'play-store';
 
 export interface FrameOptions {
   enabled: boolean;

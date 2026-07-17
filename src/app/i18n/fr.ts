@@ -273,6 +273,8 @@ export const FR = {
       top: 'Bannière haut',
       solid: 'Boîte pleine',
       outline: 'Bordure épaisse',
+      'app-store': 'Bouton App Store',
+      'play-store': 'Bouton Google Play',
     },
     frameCtaText: "Texte d'appel à l'action",
     frameCtaPlaceholder: 'Scannez-moi',

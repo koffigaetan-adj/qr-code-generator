@@ -22,7 +22,11 @@ export class ShareLinkService {
   }
 
   private encodeState(state: SharedQrState): string {
-    const json = JSON.stringify(state);
+    const clone = JSON.parse(JSON.stringify(state));
+    if (clone.design?.logo?.dataUrl && clone.design.logo.dataUrl.startsWith('data:image')) {
+      clone.design.logo.dataUrl = null;
+    }
+    const json = JSON.stringify(clone);
     return btoa(encodeURIComponent(json));
   }
 

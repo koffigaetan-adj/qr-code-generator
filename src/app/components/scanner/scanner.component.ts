@@ -13,6 +13,7 @@ export class ScannerComponent {
   readonly decodedResult = signal<string | null>(null);
   readonly error = signal<string | null>(null);
   readonly resultCopied = signal(false);
+  readonly imageUrl = signal<string | null>(null);
 
   onFileSelected(event: Event): void {
     const input = event.target as HTMLInputElement;
@@ -20,6 +21,7 @@ export class ScannerComponent {
     input.value = ''; // reset
     this.error.set(null);
     this.decodedResult.set(null);
+    this.imageUrl.set(null);
 
     if (!file) return;
 
@@ -54,6 +56,7 @@ export class ScannerComponent {
         }
       };
       img.src = e.target?.result as string;
+      this.imageUrl.set(img.src);
     };
     reader.readAsDataURL(file);
   }
